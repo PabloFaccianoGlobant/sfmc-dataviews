@@ -34,14 +34,6 @@
               </div>
             </div>
             <div class="text-sm flex items-center w-full mb-4">
-              <div class="pe-4 w-full">Fields</div>
-              <div class="flex-1">
-                <button class="px-4 py-2 hover:bg-gray-800 flex" @click="setNextDataviewFieldsVisibility">
-                  <div class="w-full" v-text="this.getDataviewsFieldsVisibilityText()"></div>
-                </button>
-              </div>
-            </div>
-            <div class="text-sm flex items-center w-full mb-4">
               <div class="pe-4 w-full">Size</div>
               <div class="flex-1">
                 <button class="px-4 py-2 hover:bg-gray-800 flex" @click="setNextSize">
@@ -119,7 +111,7 @@
                   {{ this.config.nameSize == 0 ? table.name.replace(/([a-z])([A-Z])|_/g, '$1 $2').replace(/\b\w/g, c => c.toUpperCase()) : table.name }}
                 </button>
                 <div
-                  v-for="field in (this.config.dataviewsFieldsVisibility == 0 ? table.fields : table.fields.slice(0, 5))"
+                  v-for="field in (this.config.size == 0 ? table.fields : table.fields.slice(0, 5))"
                   :key="field.name">
                   <button class="px-2 flex w-full"
                     :title="field.info"
@@ -128,8 +120,8 @@
                     <div class="ms-8 text-neutral-400 select-none" v-if="this.config.size == 0">{{ field.type }}</div>
                   </button>
                 </div>
-                <button class="p-2 flex w-full" @click="setNextDataviewFieldsVisibility"
-                  v-if="this.config.dataviewsFieldsVisibility > 0 && table.fields.length > 5">
+                <button class="p-2 flex w-full" @click="setNextSize"
+                  v-if="this.config.size > 0 && table.fields.length > 5">
                   <div class="text-center italic text-neutral-400 select-none">{{ (table.fields.length - 5) + ' more fields' }}</div>
                 </button>
               </div>
@@ -186,20 +178,40 @@ export default {
       },
       showOverlay: false,
       mouseLocation: { left: 0, top: 0 },
-      config: {
-        lastVisitedChangelog: 1,
-        showSidebar: true,
-        dataviewsVisibility: 1,
-        dataviewsFieldsVisibility: 0,
-        showEmailDataviews: true,
-        showSmsDataviews: true,
-        showPushDataviews: true,
-        showLineDataviews: true,
-        showOthersDataviews: true,
-        size: 0,
-        nameSize: 0
+      config: {}
+    }
+  },
+  watch: {
+    config: {
+     handler(){
+      if (window.localStorage /* function to detect if localstorage is supported*/) {
+        window.localStorage.setItem('storedConfig', JSON.stringify(this.config))
+      }
+     },
+     deep: true
+    }
+  },
+  mounted(){
+    // default config
+    let currentConfig = {
+      lastVisitedChangelog: 1,
+      showSidebar: true,
+      dataviewsVisibility: 1,
+      showEmailDataviews: true,
+      showSmsDataviews: true,
+      showPushDataviews: true,
+      showLineDataviews: true,
+      showOthersDataviews: true,
+      size: 0,
+      nameSize: 0
+    }  
+    if (window.localStorage){      
+      let savedConfig = window.localStorage.getItem('storedConfig');
+      if (savedConfig){
+        currentConfig = { ...currentConfig, ...JSON.parse(savedConfig) };
       }
     }
+    this.config = currentConfig;
   },
   computed: {
     currentLayout() {
@@ -319,18 +331,6 @@ export default {
         1: 'Compact ▼'
       };
       return text[this.config.size];
-    },
-    setNextDataviewFieldsVisibility() {
-      let next = this.config.dataviewsFieldsVisibility + 1;
-      if (next > 1) { next = 0; }
-      this.config.dataviewsFieldsVisibility = next;
-    },
-    getDataviewsFieldsVisibilityText() {
-      let text = {
-        0: 'Show all ▼',
-        1: 'Show up to 5 ▼'
-      };
-      return text[this.config.dataviewsFieldsVisibility];
     },
     setNextDataviewVisibility() {
       let next = this.config.dataviewsVisibility + 1;
