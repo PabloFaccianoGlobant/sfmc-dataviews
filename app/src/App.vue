@@ -2,19 +2,29 @@
   <div class="min-h-screen flex flex-col scroll-smooth bg-neutral-700 relative" @keyup="saveKeyPress($event)">
 
     <!-- Navbar -->
-    <div class="sticky top-0 w-full flex justify-between items-center bg-black/50 border-b border-sky-600 shadow backdrop-blur z-50">
-      <button @click="this.config.showSidebar = !this.config.showSidebar; if(this.config.showSidebar){ this.$gtag.pageview('settings'); }" class="p-3">
+    <div class="sticky top-0 w-full flex justify-between items-center bg-black/50 border-b border-sky-600 shadow backdrop-blur z-40">
+      <button @click="this.config.showSidebar = !this.config.showSidebar; if(this.config.showSidebar){ this.$gtag.pageview('settings'); }" class="p-3 hover:bg-neutral-700">
         <img width="30" height="30" src="https://img.icons8.com/ios-filled/30/666666/settings.png" alt="Settings" />
       </button>
       <span class="text-neutral-400 text-lg">
         <span class="font-medium">SFMC Data Views </span><span class="font-light text-sm">by Pablo Facciano</span>
       </span>
-      <button @click="this.config.showProfile = !this.config.showProfile; if(this.config.showProfile){ this.$gtag.pageview('profile'); }" class="p-3 relative flex">
+      <button @click="this.config.showProfile = !this.config.showProfile; if(this.config.showProfile){ this.$gtag.pageview('profile'); }" class="p-3 relative flex hover:bg-neutral-700">
         <img width="30" height="30" src="https://img.icons8.com/ios-filled/30/666666/user-male-circle--v1.png" alt="Profile" />
         <span class="relative flex h-3 w-3 -ms-2" v-if="pendingNotification">
           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
           <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
         </span>
+      </button>
+    </div>
+
+    <!-- Changelog message -->
+    <div class="fixed top-0 w-full bg-sky-600 z-50 text-white" v-if="this.config.lastVisitedChangelog != this.changelogVersion">
+      <button class="cursor-pointer flex justify-between items-center w-full cursor-pointer p-4" @click="this.openChangelog">
+      <div>🆕 Some things have changed! Click here to see the <span class="inline-flex align-center">
+              <span class="me-2 hover:underline hover:decoration-solid">changelog<sup><small>{{ 'V' + this.changelogVersion }}</small></sup></span>
+              </span></div>
+      <div>&times;</div>
       </button>
     </div>
 
@@ -156,7 +166,7 @@
           <div class="text-xl font-medium	mb-6">About app</div>
           <div>Tired of typing several times the same query and looking for the documentation every time I need it, I created this app to save time and centralize the knowledge about the DataViews available in SFMC.</div>
           <button @click="openChangelog"
-            :class="{ 'bg-sky-600':this.pendingNotification, 'bg-neutral-800 border border-neutral-300': !this.pendingNotification}"
+            :class="{ 'bg-sky-600 hover:bg-sky-500':this.pendingNotification, 'bg-neutral-800 hover:bg-neutral-700 border-none': !this.pendingNotification}"
             class="text-white px-6 py-2 mt-4 rounded flex items-center">
             <span>Open Changelog<sup><small>{{ 'V' + this.changelogVersion }}</small></sup></span>
           </button>
