@@ -9,17 +9,20 @@
       <span class="text-neutral-400 text-lg">
         <span class="font-medium">SFMC Data Views </span><span class="font-light text-sm">by Pablo Facciano</span>
       </span>
-      <a href="https://marketingcloudspecialist.hashnode.dev/?utm_source=dataviewsdiagram&utm_medium=direct&utm_campaign=header&utm_content=My%20Blog"
-        target="_blank" class="p-3 cursor-pointer flex items-center text-sky-600 hover:underline hover:decoration-solid">
-        <span class="me-2">My Blog</span>
-        <img width="15" height="15" src="https://img.icons8.com/ios/20/0284C7/external-link.png" alt="external-link" />
-      </a>
+      <button @click="this.config.showProfile = !this.config.showProfile" class="p-3 relative flex">
+        <img width="30" height="30" src="https://img.icons8.com/ios-filled/30/666666/user-male-circle--v1.png" alt="Profile" />
+        <span class="relative flex h-3 w-3 -ms-2" v-if="pendingNotification">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+        </span>
+      </button>
     </div>
 
     <!-- Content -->
     <div class="flex-1 flex h-full relative bg-neutral-900">
 
-      <!-- Sidebar  w-3/4 md:w-1/2 lg:w-1/3 xl:w-1/4 xxl:w-1/5   -->
+
+      <!-- Sidebar -->
       <div class="w-auto px-2 py-3 shadow text-neutral-300 whitespace-nowrap sticky h-full top-10 left-0" v-show="this.config.showSidebar">
         <div class="p-3">
 
@@ -146,6 +149,87 @@
 
       </div>
 
+      <!-- My Profile -->
+      <div class="w-auto p-6 text-neutral-300 flex flex-col gap-6" v-show="this.config.showProfile">
+        
+        <div>
+          <div class="text-xl font-medium	mb-6">About app</div>
+          <div>Tired of typing several times the same query and looking for the documentation every time I need it, I created this app to save time and centralize the knowledge about the DataViews available in SFMC.</div>
+          <button @click="openChangelog"
+            :class="{ 'bg-sky-600':this.pendingNotification, 'bg-neutral-800 border border-neutral-300': !this.pendingNotification}"
+            class="text-white px-6 py-2 mt-4 rounded flex items-center">
+            <span>Open Changelog<sup><small>{{ 'V' + this.changelogVersion }}</small></sup></span>
+          </button>
+        </div>
+        <div>
+          <div class="text-xl font-medium	mb-6">Something wrong?</div>
+          <div>You can upload an Issue in the repo or send me a message via email or LinkedIn (links below).<br>Happy to continue improving!</div>
+        </div>
+        <div>
+          <div class="text-xl font-medium	mb-6">About me</div>
+          <img src="/pablofacciano.png" alt="Pablo Facciano" width="200" class="h-auto rounded-full" />
+          <div class="mt-4">My name is <span class="font-medium">Pablo Facciano</span> and I am a <span class="italic">Salesforce Marketing Cloud Developer</span> at <span class="italic">Globant</span>.</div>
+        </div>
+        <div>
+          <div class="text-xl font-medium mb-6">Links</div>
+          <div class="flex flex-col gap-3">
+            <a href="https://marketingcloudspecialist.hashnode.dev/?utm_source=dataviewsdiagram&utm_medium=direct&utm_campaign=header&utm_content=My%20Blog"
+              target="_blank" class="cursor-pointer flex items-center text-sky-600 hover:underline hover:decoration-solid">
+              <span class="me-2">My Blog</span>
+              <img width="15" height="15" src="https://img.icons8.com/ios/20/0284C7/external-link.png" alt="blog" />
+            </a>
+            <a href="https://www.linkedin.com/in/pablofacciano/"
+              target="_blank" class="cursor-pointer flex items-center text-sky-600 hover:underline hover:decoration-solid">
+              <span class="me-2">LinkedIn</span>
+              <img width="15" height="15" src="https://img.icons8.com/ios/20/0284C7/external-link.png" alt="linkedin" />
+            </a>
+            <a href="https://github.com/PabloFacciano/"
+              target="_blank" class="cursor-pointer flex items-center text-sky-600 hover:underline hover:decoration-solid">
+              <span class="me-2">GitHub (Personal)</span>
+              <img width="15" height="15" src="https://img.icons8.com/ios/20/0284C7/external-link.png" alt="linkedin" />
+            </a>
+            <a href="https://github.com/PabloFaccianoGlobant/"
+              target="_blank" class="cursor-pointer flex items-center text-sky-600 hover:underline hover:decoration-solid">
+              <span class="me-2">GitHub (Enterprise)</span>
+              <img width="15" height="15" src="https://img.icons8.com/ios/20/0284C7/external-link.png" alt="linkedin" />
+            </a>
+            <a href="https://trailblazer.me/id/pablofacciano"
+              target="_blank" class="cursor-pointer flex items-center text-sky-600 hover:underline hover:decoration-solid">
+              <span class="me-2">Trailblazer Profile (Trailhead)</span>
+              <img width="15" height="15" src="https://img.icons8.com/ios/20/0284C7/external-link.png" alt="linkedin" />
+            </a>
+            <a href="mailto:pablo.facciano@globant.com"
+              target="_blank" class="cursor-pointer flex items-center text-sky-600 hover:underline hover:decoration-solid">
+              <span class="me-2">Email</span>
+              <img width="15" height="15" src="https://img.icons8.com/ios/20/0284C7/external-link.png" alt="linkedin" />
+            </a>
+          </div>  
+        </div>
+        <div>
+        <div class="text-xl font-medium	mb-6">Tech Stack</div>
+          <div>Built using <a href="https://vuejs.org/"
+              target="_blank" class="cursor-pointer inline-flex items-center text-sky-600 hover:underline hover:decoration-solid">
+              <span class="me-2">Vue 3</span>
+              <img width="15" height="15" src="https://img.icons8.com/ios/20/0284C7/external-link.png" alt="vue3" />
+            </a> and <a href="https://tailwindcss.com/"
+              target="_blank" class="cursor-pointer inline-flex items-center text-sky-600 hover:underline hover:decoration-solid">
+              <span class="me-2">TailwindCSS</span>
+              <img width="15" height="15" src="https://img.icons8.com/ios/20/0284C7/external-link.png" alt="tailwindcss" />
+            </a>.</div>
+          <div>Open Source! See repo at <a href="https://github.com/PabloFaccianoGlobant/sfmc-dataviews"
+              target="_blank" class="cursor-pointer inline-flex items-center text-sky-600 hover:underline hover:decoration-solid">
+              <span class="me-2">GitHub</span>
+              <img width="15" height="15" src="https://img.icons8.com/ios/20/0284C7/external-link.png" alt="tailwindcss" />
+            </a></div>
+          <div>Icons from <a href="https://icons8.com/"
+              target="_blank" class="cursor-pointer inline-flex items-center text-sky-600 hover:underline hover:decoration-solid">
+              <span class="me-2">Icons8.com</span>
+              <img width="15" height="15" src="https://img.icons8.com/ios/20/0284C7/external-link.png" alt="tailwindcss" />
+            </a></div>
+        </div>
+
+      </div>
+
     </div>
 
 
@@ -170,6 +254,11 @@
       </div>
       <div class="fixed inline-block w-full h-full left-0 top-0 bg-black/50" v-show="showOverlay"
         @mouseover="closeContextMenu">
+
+      </div>
+      <div class="fixed top-50 bottom-50 w-50 h-50 rounded-md bg-neutral-100" v-if="this.showChangelogModal">
+        
+
 
       </div>
       <div class="fixed bg-neutral-800 shadow text-white rounded-md overflow-hidden h-auto p-3" v-show="tableContextMenu.show"
@@ -205,6 +294,7 @@ export default {
   },
   data: function () {
     return {
+      changelogVersion: 1,
       tableContextMenu: {
         show: false,
         table: null
@@ -229,7 +319,9 @@ export default {
     // default config
     let currentConfig = {
       lastVisitedChangelog: 1,
+      showChangelogModal: false,
       showSidebar: false,
+      showProfile: false,
       dataviewsVisibility: 1,
       showEmailDataviews: true,
       showSmsDataviews: true,
@@ -248,6 +340,12 @@ export default {
     this.config = currentConfig;
   },
   computed: {
+    pendingNotification(){
+      if (this.config.lastVisitedChangelog != this.changelogVersion){
+        return true;
+      }
+      return false;
+    },  
     currentLayout() {
       let layout = [];
       diagramInfo.layout.forEach(row => {
@@ -290,6 +388,12 @@ export default {
     }
   },
   methods: {
+    openChangelog(){
+      this.config.lastVisitedChangelog = this.changelogVersion;
+      this.config.showChangelogModal = true;
+
+
+    },
     scrollTo(to, currentScrollRowindex){ 
       const el = this.$refs[to];
       if (el) {
