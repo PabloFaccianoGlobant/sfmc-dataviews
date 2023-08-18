@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen flex flex-col scroll-smooth bg-neutral-700 relative">
+  <div class="min-h-screen flex flex-col scroll-smooth bg-neutral-700 relative" @keyup="saveKeyPress($event)">
 
     <!-- Navbar -->
     <div class="sticky top-0 w-full flex justify-between items-center bg-black/50 border-b border-sky-600 shadow backdrop-blur z-50">
@@ -392,6 +392,11 @@ export default {
     }
   },
   methods: {
+    saveKeyPress(e){
+      this.$gtag.event('key-up', {
+        'event_label': e.code
+      });
+    },
     openChangelog(){
       this.$gtag.pageview('changelog');
       this.config.lastVisitedChangelog = this.changelogVersion;
