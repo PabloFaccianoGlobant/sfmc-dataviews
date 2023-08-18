@@ -257,12 +257,6 @@
       <div class="fixed inline-block w-full h-full left-0 top-0 bg-black/50" v-show="showOverlay"
         @mouseover="closeContextMenu">
       </div>
-      <!-- Changelog Modal -->
-      <div class="fixed top-50 bottom-50 w-50 h-50 rounded-md bg-neutral-100" v-if="this.showChangelogModal">
-        
-        <!-- TO-DO -->
-
-      </div>
       <!-- Table Context Menu -->
       <div class="fixed bg-neutral-800 shadow text-white rounded-md overflow-hidden h-auto p-3" v-show="tableContextMenu.show"
         :style="this.mouseLocation">
@@ -323,7 +317,6 @@ export default {
     // default config
     let currentConfig = {
       lastVisitedChangelog: 1,
-      showChangelogModal: false,
       showSidebar: false,
       showProfile: false,
       dataviewsVisibility: 1,
@@ -400,9 +393,7 @@ export default {
     openChangelog(){
       this.$gtag.pageview('changelog');
       this.config.lastVisitedChangelog = this.changelogVersion;
-      this.config.showChangelogModal = true;
-
-
+      window.open('https://github.com/PabloFaccianoGlobant/sfmc-dataviews/blob/main/Changelog.md');
     },
     scrollTo(to, currentScrollRowindex){ 
       const el = this.$refs[to];
