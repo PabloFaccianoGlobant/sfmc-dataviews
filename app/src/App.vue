@@ -1,8 +1,8 @@
 <template>
-  <div class="min-h-screen flex flex-col scroll-smooth">
+  <div class="min-h-screen flex flex-col scroll-smooth bg-neutral-700 relative">
 
     <!-- Navbar -->
-    <div class="flex justify-between items-center bg-neutral-800 border-b border-sky-600 shadow">
+    <div class="sticky top-0 w-full flex justify-between items-center bg-black/50 border-b border-sky-600 shadow backdrop-blur z-50">
       <button @click="this.config.showSidebar = !this.config.showSidebar" class="p-3">
         <img width="30" height="30" src="https://img.icons8.com/ios-filled/30/666666/settings.png" alt="Settings" />
       </button>
@@ -17,10 +17,10 @@
     </div>
 
     <!-- Content -->
-    <div class="flex-1 flex h-full scroll-smooth">
+    <div class="flex-1 flex h-full relative bg-neutral-900">
 
       <!-- Sidebar  w-3/4 md:w-1/2 lg:w-1/3 xl:w-1/4 xxl:w-1/5   -->
-      <div class="w-auto p-2 bg-neutral-900 shadow text-neutral-300 whitespace-nowrap" v-show="this.config.showSidebar">
+      <div class="w-auto px-2 py-3 shadow text-neutral-300 whitespace-nowrap sticky h-full top-10 left-0" v-show="this.config.showSidebar">
         <div class="p-3">
 
           <div class="w-full">
@@ -97,15 +97,30 @@
 
       <!-- Tables -->
       <div v-dragscroll.pass
-        class="w-full items-stretch px-12 bg-neutral-800 overflow-auto cursor-grab active:cursor-grabbing">
+        class="w-full px-12 bg-neutral-800 overflow-auto cursor-grab active:cursor-grabbing">
+
+        <div 
+          class="text-center text-neutral-400 inline-block w-full h-full flex flex-col justify-center animate-pulse"
+          v-if="this.currentLayout.length == 0"
+        >
+          <div class="flex justify-center mb-4">
+            <span class="text-4xl rounded-full border border-neutral-400 w-20 h-20 flex items-center justify-center">
+              <span class="rotate-45 font-bold">:/</span>
+            </span>
+          </div>
+          <div class="text-3xl mb-4">Nothing to see here</div>
+          <div>Try adjusting your filter to find what you are looking for.</div>
+
+        </div>
+
         <!-- Table -->
-        <div v-for="row in this.currentLayout" :key="row.name">
+        <div v-for="(row,rowindex) in this.currentLayout" :key="row.name" :ref="'tablerow-'+rowindex">
           <div class="text-neutral-300 mt-12 mb-6 text-xl font-medium">{{ row.name }}</div>
           <div class="flex mb-6">
-            <div v-for="table in row.tables" :key="table.name" class="relative">
+            <div v-for="(table,tableindex) in row.tables" :key="table.name" :ref="'table-'+rowindex+'-'+tableindex" class="relative">
               <!-- table itselft -->
               <div class="bg-neutral-700 text-neutral-300 me-6 rounded-md overflow-hidden whitespace-nowrap">
-                <button class="bg-sky-600 text-center w-full text-white cursor-auto px-4"
+                <button class="bg-sky-600 text-center w-full text-white cursor-hand active:cursor-grabbing px-4"
                   :class="{ 'py-2': this.config.size == 0, 'py-1': this.config.size == 1 }"
                   @click="openTableInfo($event, table)">
                   {{ this.config.nameSize == 0 ? table.name.replace(/([a-z])([A-Z])|_/g, '$1 $2').replace(/\b\w/g, c => c.toUpperCase()) : table.name }}
@@ -113,14 +128,14 @@
                 <div
                   v-for="field in (this.config.size == 0 ? table.fields : table.fields.slice(0, 5))"
                   :key="field.name">
-                  <button class="px-2 flex w-full"
+                  <button class="px-2 flex w-full cursor-grab active:cursor-grabbing"
                     :title="field.info"
                     :class="{ 'py-2': this.config.size == 0, 'py-1': this.config.size == 1 }">
-                    <div class="flex-1 text-start select-all">{{ this.config.nameSize == 0 ? field.name.replace(/([a-z])([A-Z])|_/g, '$1 $2').replace(/\b\w/g, c => c.toUpperCase()) : field.name }}</div>
+                    <div class="flex-1 text-start select-none">{{ this.config.nameSize == 0 ? field.name.replace(/([a-z])([A-Z])|_/g, '$1 $2').replace(/\b\w/g, c => c.toUpperCase()) : field.name }}</div>
                     <div class="ms-8 text-neutral-400 select-none" v-if="this.config.size == 0">{{ field.type }}</div>
                   </button>
                 </div>
-                <button class="p-2 flex w-full" @click="setNextSize"
+                <button class="p-2 flex w-full cursor-hand" @click="setNextSize"
                   v-if="this.config.size > 0 && table.fields.length > 5">
                   <div class="text-center italic text-neutral-400 select-none">{{ (table.fields.length - 5) + ' more fields' }}</div>
                 </button>
@@ -133,13 +148,31 @@
 
     </div>
 
+
     <!-- Context Menu -->
     <div>
+      <div class="fixed bottom-10 right-10 inline-block w-40 h-24 bg-black/50 rounded overflow-hidden p-2 shadow-md flex backdrop-blur-2xl" draggable="false">
+
+        <div class="overflow-hidden w-full h-full flex flex-col content-stretch">
+          <div v-for="(row,rowindex) in this.currentLayout" :key="row.name" class="w-full h-full cursor-pointer hover:bg-neutral-500/10" @click="scrollTo('tablerow-'+rowindex,rowindex)">
+            <div class="flex w-full h-full">
+              <div v-for="(table,tableindex) in row.tables" :key="table.name" class="flex-1 max-w-[1rem] hover:bg-neutral-100 cursor-none" @click.stop="scrollTo('table-'+rowindex+'-'+tableindex,rowindex)">
+                <!-- table itselft -->
+                <div class="bg-neutral-700/50 w-full h-full">
+                  <div class="h-1/4 bg-sky-600"></div>
+                  <div class="h-3/4"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+      </div>
       <div class="fixed inline-block w-full h-full left-0 top-0 bg-black/50" v-show="showOverlay"
         @mouseover="closeContextMenu">
 
       </div>
-      <div class="fixed bg-neutral-800 text-white rounded-md overflow-hidden h-auto p-3" v-show="tableContextMenu.show"
+      <div class="fixed bg-neutral-800 shadow text-white rounded-md overflow-hidden h-auto p-3" v-show="tableContextMenu.show"
         :style="this.mouseLocation">
         <div class="text-center">
           <button @click="onClick_copySQL" class="flex gap-3 py-3 ps-3 pe-8 hover:bg-neutral-700 rounded-md w-full">
@@ -178,7 +211,8 @@ export default {
       },
       showOverlay: false,
       mouseLocation: { left: 0, top: 0 },
-      config: {}
+      config: {},
+      currentScrollRowindex: null
     }
   },
   watch: {
@@ -195,15 +229,15 @@ export default {
     // default config
     let currentConfig = {
       lastVisitedChangelog: 1,
-      showSidebar: true,
+      showSidebar: false,
       dataviewsVisibility: 1,
       showEmailDataviews: true,
       showSmsDataviews: true,
       showPushDataviews: true,
       showLineDataviews: true,
       showOthersDataviews: true,
-      size: 0,
-      nameSize: 0
+      size: 1,
+      nameSize: 1
     }  
     if (window.localStorage){      
       let savedConfig = window.localStorage.getItem('storedConfig');
@@ -256,6 +290,26 @@ export default {
     }
   },
   methods: {
+    scrollTo(to, currentScrollRowindex){ 
+      const el = this.$refs[to];
+      if (el) {
+        // Use el.scrollIntoView() to instantly scroll to the element
+        if (this.lastScrollId && this.lastScrollId != to){
+          const el2 = this.$refs[this.lastScrollId];
+          if (el2 && el2.length > 0){
+            el2[0].scrollIntoView({ block: "center", inline: "nearest" });
+          }
+        }
+
+        el[0].scrollIntoView({ 
+          behavior: "smooth", 
+          block: "center", 
+          inline: "center"
+        });
+        this.lastScrollId = to;
+        this.currentScrollRowindex = currentScrollRowindex;
+      }
+    },
     onClick_openLink() {
       if (this.tableContextMenu.table.link) {
         window.open(this.tableContextMenu.table.link);
