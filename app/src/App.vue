@@ -3,13 +3,13 @@
 
     <!-- Navbar -->
     <div class="sticky top-0 w-full flex justify-between items-center bg-black/50 border-b border-sky-600 shadow backdrop-blur z-50">
-      <button @click="this.config.showSidebar = !this.config.showSidebar" class="p-3">
+      <button @click="this.config.showSidebar = !this.config.showSidebar; if(this.config.showSidebar){ this.$gtag.pageview('settings'); }" class="p-3">
         <img width="30" height="30" src="https://img.icons8.com/ios-filled/30/666666/settings.png" alt="Settings" />
       </button>
       <span class="text-neutral-400 text-lg">
         <span class="font-medium">SFMC Data Views </span><span class="font-light text-sm">by Pablo Facciano</span>
       </span>
-      <button @click="this.config.showProfile = !this.config.showProfile" class="p-3 relative flex">
+      <button @click="this.config.showProfile = !this.config.showProfile; if(this.config.showProfile){ this.$gtag.pageview('profile'); }" class="p-3 relative flex">
         <img width="30" height="30" src="https://img.icons8.com/ios-filled/30/666666/user-male-circle--v1.png" alt="Profile" />
         <span class="relative flex h-3 w-3 -ms-2" v-if="pendingNotification">
           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
@@ -233,8 +233,9 @@
     </div>
 
 
-    <!-- Context Menu -->
+    <!-- Dialogs -->
     <div>
+      <!-- Minimap -->
       <div class="fixed bottom-10 right-10 inline-block w-40 h-24 bg-black/50 rounded overflow-hidden p-2 shadow-md flex backdrop-blur-2xl" draggable="false">
 
         <div class="overflow-hidden w-full h-full flex flex-col content-stretch">
@@ -252,15 +253,17 @@
         </div>
         
       </div>
+      <!-- Background (autoclosed) -->
       <div class="fixed inline-block w-full h-full left-0 top-0 bg-black/50" v-show="showOverlay"
         @mouseover="closeContextMenu">
-
       </div>
+      <!-- Changelog Modal -->
       <div class="fixed top-50 bottom-50 w-50 h-50 rounded-md bg-neutral-100" v-if="this.showChangelogModal">
         
-
+        <!-- TO-DO -->
 
       </div>
+      <!-- Table Context Menu -->
       <div class="fixed bg-neutral-800 shadow text-white rounded-md overflow-hidden h-auto p-3" v-show="tableContextMenu.show"
         :style="this.mouseLocation">
         <div class="text-center">
@@ -316,6 +319,7 @@ export default {
     }
   },
   mounted(){
+    this.$gtag.pageview('home');
     // default config
     let currentConfig = {
       lastVisitedChangelog: 1,
@@ -389,6 +393,7 @@ export default {
   },
   methods: {
     openChangelog(){
+      this.$gtag.pageview('changelog');
       this.config.lastVisitedChangelog = this.changelogVersion;
       this.config.showChangelogModal = true;
 
@@ -416,19 +421,28 @@ export default {
     },
     onClick_openLink() {
       if (this.tableContextMenu.table.link) {
-        window.open(this.tableContextMenu.table.link);
+        this.$gtag.event('open-link', {
+          'event_label': this.tableContextMenu.table.link
+        });
+        window.open(this.tableContextMenu.table.link);     
       }
       this.closeContextMenu();
     },
     onClick_copySQL() {
       let query = this.getQueryForCurrentTable();
       console.log(query);
+      this.$gtag.event('copy-sql', {
+        'event_label': this.tableContextMenu.table.name
+      });
       this.copyToClipboard(query);
       this.closeContextMenu();
     },
     onClick_copyFields() {
       let fields = this.getFieldsForCurrentTable();
       console.log(fields);
+      this.$gtag.event('copy-fields', {
+        'event_label': this.tableContextMenu.table.name
+      });
       this.copyToClipboard(fields);
       this.closeContextMenu();
     },
@@ -470,6 +484,9 @@ export default {
       let next = this.config.nameSize + 1;
       if (next > 1) { next = 0; }
       this.config.nameSize = next;
+      this.$gtag.event('change-name', {
+        'event_label': next
+      });
     },
     getNameSizeText() {
       let text = {
@@ -482,6 +499,9 @@ export default {
       let next = this.config.size + 1;
       if (next > 1) { next = 0; }
       this.config.size = next;
+      this.$gtag.event('change-size', {
+        'event_label': next
+      });
     },
     getSizeText() {
       let text = {
@@ -494,6 +514,9 @@ export default {
       let next = this.config.dataviewsVisibility + 1;
       if (next > 3) { next = 0; }
       this.config.dataviewsVisibility = next;
+      this.$gtag.event('change-visibility', {
+        'event_label': next
+      });
     },
     getDataviewsVisibilityText() {
       let text = {
