@@ -1014,12 +1014,12 @@ export default {
         {
           name: 'ModifiedDate',
           info: 'The date that the version of the journey was last edited	',
-          type: 'Number'
+          type: 'Date'
         },
         {
           name: 'LastPublishedDate',
           info: 'The date that the version of the journey was last published	',
-          type: 'Number'
+          type: 'Date'
         },
         {
           name: 'JourneyStatus',
