@@ -110,7 +110,8 @@
 
       <!-- Tables -->
       <div v-dragscroll.pass
-        class="w-full px-12 bg-neutral-800 overflow-auto cursor-grab active:cursor-grabbing">
+        class="w-full px-12 bg-neutral-800 overflow-auto cursor-grab active:cursor-grabbing"
+        >
 
         <div 
           class="text-center text-neutral-400 inline-block w-full h-full flex flex-col justify-center animate-pulse"
@@ -127,26 +128,39 @@
         </div>
 
         <!-- Table -->
-        <div v-for="(row,rowindex) in this.currentLayout" :key="row.name" :ref="'tablerow-'+rowindex">
+        <div v-for="(row,rowindex) in this.currentLayout" :key="row.name" :ref="'tablerow-'+rowindex" >
           <div class="text-neutral-300 mt-12 mb-6 text-xl font-medium">{{ row.name }}</div>
           <div class="flex mb-6">
-            <div v-for="(table,tableindex) in row.tables" :key="table.name" :ref="'table-'+rowindex+'-'+tableindex" class="relative">
+            <div v-for="(table,tableindex) in row.tables" :key="table.name" :ref="'table-'+rowindex+'-'+tableindex" class="relative w-auto">
               <!-- table itselft -->
-              <div class="bg-neutral-700 text-neutral-300 me-6 rounded-md overflow-hidden whitespace-nowrap">
+              <div class="bg-neutral-700 text-neutral-300 me-6 rounded-md overflow-hidden whitespace-nowrap w-auto"
+                    @contextmenu.prevent="openTableInfo($event, table)">
                 <button class="bg-sky-600 text-center w-full text-white cursor-hand active:cursor-grabbing px-4"
                   :class="{ 'py-2': this.config.size == 0, 'py-1': this.config.size == 1 }"
-                  @click="openTableInfo($event, table)">
+                  @click.stop="openTableInfo($event, table)">
                   {{ this.config.nameSize == 0 ? table.name.replace(/([a-z])([A-Z])|_/g, '$1 $2').replace(/\b\w/g, c => c.toUpperCase()) : table.name }}
                 </button>
                 <div
+                  class="w-auto"
                   v-for="field in (this.config.size == 0 ? table.fields : table.fields.slice(0, 5))"
                   :key="field.name">
-                  <button class="px-2 flex w-full cursor-grab active:cursor-grabbing"
+                  <div class="px-2 flex gap-4 w-auto min-w-full justify-between select-none"
+                    draggable="false"
                     :title="field.info"
-                    :class="{ 'py-2': this.config.size == 0, 'py-1': this.config.size == 1 }">
-                    <div class="flex-1 text-start select-none">{{ this.config.nameSize == 0 ? field.name.replace(/([a-z])([A-Z])|_/g, '$1 $2').replace(/\b\w/g, c => c.toUpperCase()) : field.name }}</div>
-                    <div class="ms-8 text-neutral-400 select-none" v-if="this.config.size == 0">{{ field.type }}</div>
-                  </button>
+                    :class="{ 
+                      'py-2': this.config.size == 0, 'py-1': this.config.size == 1,
+                      'cursor-pointer hover:bg-white/10 active:bg-white/20 hover:text-white': (this.filterMode?.table?.name != null && this.filterMode?.table?.name == table.name),
+                      'cursor-grab active:cursor-grabbing': !(this.filterMode?.table?.name != null && this.filterMode?.table?.name == table.name)
+                    }"
+                    @click="openFieldFilter($event, table, field)"
+                  >
+                    <div class="min-w-fit" v-if="this.filterMode?.table?.name != null && this.filterMode?.table?.name == table.name"> 
+                      <img class="inline-block" v-if="field.condition" width="16" height="16" src="https://img.icons8.com/ios-filled/16/007ACC/filter--v1.png" alt="filterfield" />
+                      <img class="inline-block" v-else width="16" height="16" src="https://img.icons8.com/ios-filled/16/AAAAAA/filter--v1.png" alt="filterfield" />
+                    </div>
+                    <div class="text-start flex-1">{{ this.config.nameSize == 0 ? field.name.replace(/([a-z])([A-Z])|_/g, '$1 $2').replace(/\b\w/g, c => c.toUpperCase()) : field.name }}</div>
+                    <div class="text-neutral-100/25" v-if="this.config.size == 0">{{ field.type }}</div>
+                  </div>
                 </div>
                 <button class="p-2 flex w-full cursor-hand" @click="setNextSize"
                   v-if="this.config.size > 0 && table.fields.length > 5">
@@ -268,22 +282,90 @@
         @mouseover="closeContextMenu">
       </div>
       <!-- Table Context Menu -->
-      <div class="fixed bg-neutral-800 shadow text-white rounded-md overflow-hidden h-auto p-3" v-show="tableContextMenu.show"
+      <div class="fixed bg-neutral-800 shadow text-white rounded-md overflow-hidden h-auto p-3 select-none" v-if="tableContextMenu.show"
         :style="this.mouseLocation">
         <div class="text-center">
           <button @click="onClick_copySQL" class="flex gap-3 py-3 ps-3 pe-8 hover:bg-neutral-700 rounded-md w-full">
-            <div><img width="24" height="24" src="https://img.icons8.com/ios/24/FFFFFF/sql.png" alt="sql" /></div>
+            <div><img width="24" height="24" src="https://img.icons8.com/ios/24/FFFFFF/sql.png" alt="copysql" /></div>
             <div>Copy SQL</div>
           </button>
           <button @click="onClick_copyFields" class="flex gap-3 py-3 ps-3 pe-8 hover:bg-neutral-700 rounded-md w-full">
-            <div><img width="24" height="24" src="https://img.icons8.com/windows/32/FFFFFF/copy.png" alt="link--v1" />
+            <div><img width="24" height="24" src="https://img.icons8.com/windows/32/FFFFFF/copy.png" alt="copyfields" />
             </div>
             <div>Copy Fields</div>
+          </button>
+          <button @click="onClick_filterSQL($event)" class="flex gap-3 py-3 ps-3 pe-8 hover:bg-neutral-700 rounded-md w-full">
+            <div><img width="24" height="24" src="https://img.icons8.com/ios-filled/24/FFFFFF/filter--v1.png" alt="filtersql" /></div>
+            <div>Enable Filters</div>
           </button>
           <button @click="onClick_openLink" v-show="this.tableContextMenu?.table?.link != ''"
             class="flex gap-3 py-3 ps-3 pe-8 hover:bg-neutral-700 rounded-md w-full">
             <div><img width="24" height="24" src="https://img.icons8.com/ios/24/FFFFFF/link--v1.png" alt="link" /></div>
             <div>Open Docs</div>
+          </button>
+        </div>
+      </div>
+      <!-- Field Context Menu -->
+      <div class="fixed bg-neutral-800 shadow text-white rounded-md overflow-hidden h-auto p-3" v-if="filterMode.showContextMenu && this.filterMode?.field != null"
+        :style="this.mouseLocation">        
+        <div class="flex flex-col gap-4">
+          
+          <!-- Condition -->
+          <div v-if="this.currentFieldInfo.showCondition">Condition:</div>
+          <div 
+            v-if="this.currentFieldInfo.showCondition"
+            class="flex"
+          >
+            <div class="flex border border-neutral-700/50">
+              <input v-model="this.filterMode.field.not" type="checkbox" id="not-condition" class="peer hidden" />
+              <label for="not-condition" class="p-2 outline-none select-none cursor-pointer text-neutral-600 transition-colors duration-200 ease-in-out line-through peer-checked:text-neutral-200 peer-checked:no-underline bg-neutral-700/50">Not</label>
+            </div>
+            <select 
+              class="flex-1 bg-neutral-700/50 p-2"
+              v-model="this.filterMode.field.condition"
+            >
+              <option v-for="c in this.currentFieldInfo.availableConditions" :key="c.value" :value="c.value" v-text="c.label"></option>
+            </select>
+          </div>
+          
+          <!-- Range -->
+          <div v-if="this.currentFieldInfo.showRange">Range:</div>
+          <select 
+            class="bg-neutral-700/50 p-2"
+            v-if="this.currentFieldInfo.showRange"
+            v-model="this.filterMode.field.range"
+          >    
+            <option v-for="c in this.currentFieldInfo.availableRanges" :key="c.value" :value="c.value" v-text="c.label"></option>
+          </select>
+
+          <!-- Value 1 -->
+          <div v-if="this.currentFieldInfo.showValue1">{{ this.currentFieldInfo.labelValue1 }}</div>
+          <input 
+            v-if="this.currentFieldInfo.showValue1"
+            :type="this.currentFieldInfo.inputType"
+            class="p-2 rounded bg-neutral-700/50 text-white outline-0"
+            autocomplete="one-time-code"
+            v-model="this.filterMode.field.value"
+          />
+
+          <!-- Value 2 -->
+          <div v-if="this.currentFieldInfo.showValue2">{{ this.currentFieldInfo.labelValue2 }}</div>
+          <input 
+            v-if="this.currentFieldInfo.showValue2"
+            :type="this.currentFieldInfo.inputType"
+            class="p-2 rounded bg-neutral-700/50 text-white outline-0"
+            autocomplete="one-time-code"
+            v-model="this.filterMode.field.value2"
+          />
+
+          <!-- Close -->
+          <button @click="closeContextMenu" class="mt-6 text-center py-2 px-4 flex-1 rounded-md w-full bg-neutral-700/50 text-white hover:bg-sky-600">
+            Close
+          </button>
+
+          <!-- Remove filter -->
+          <button @click="onClick_removeFilter" class="text-center py-2 px-4 flex-1 rounded-md w-full bg-neutral-700/50 text-white hover:bg-red-700">
+            Remove
           </button>
         </div>
       </div>
@@ -294,6 +376,8 @@
 <script>
 import { dragscroll } from 'vue-dragscroll'
 import diagramInfo from '@/diagramInfo.js';
+import queryBuilder from '@/queryBuilder.js';
+
 export default {
   name: 'App',
   directives: {
@@ -301,7 +385,7 @@ export default {
   },
   data: function () {
     return {
-      changelogVersion: 1,
+      changelogVersion: 2,
       tableContextMenu: {
         show: false,
         table: null
@@ -309,6 +393,12 @@ export default {
       showOverlay: false,
       mouseLocation: { left: 0, top: 0 },
       config: {},
+      filterMode: {
+        enabled: () => { return this.filterMode.table != null },
+        table: null,
+        field: null,
+        showContextMenu: false
+      },
       currentScrollRowindex: null
     }
   },
@@ -347,6 +437,117 @@ export default {
     this.config = currentConfig;
   },
   computed: {
+    currentFieldInfo(){
+      const currentField = this.filterMode?.field;
+      let labelValue1 = '',
+          labelValue2 = '',
+          availableConditions = [],
+          availableRanges = [];
+
+      let inputType = 'text';
+      if (currentField.type.includes("Email")){
+        inputType = 'email';
+      } else if (currentField.type.includes("Phone")){
+        inputType = 'tel';
+      } else if (currentField.type == "Date"){
+        inputType = 'date';
+      } else if (currentField.type == "Number"){
+        inputType = 'number';
+      }
+
+      // BOOLEAN
+      if (currentField.type == 'Boolean'){
+        availableConditions = [
+          { value: 'empty', label: 'empty' },
+          { value: '1', label: 'True' },
+          { value: '0', label: 'False' }
+        ];
+      }
+      // TEXT
+      if (currentField.type != 'Boolean' && (inputType == 'text' || inputType == 'email')){
+        availableConditions = [
+          { value: 'empty', label: 'empty' },
+          { value: 'equals', label: 'equals' },
+          { value: 'contains', label: 'contains' },
+          { value: 'starts', label: 'starts with' },
+          { value: 'ends', label: 'ends with' }
+        ];
+        if (currentField.condition && currentField.condition != 'empty'){
+          labelValue1 = 'Value:';
+        }
+      }
+      // NUMBER
+      if (inputType == 'number' || inputType == 'tel'){
+        availableConditions = [
+          { value: 'empty', label: 'empty' },
+          { value: 'equals', label: 'equals' },
+          { value: 'inrange', label: 'in range' },
+          { value: 'less', label: 'less than' },
+          { value: 'greather', label: 'greather than' },
+          { value: 'lessequals', label: 'less or equals than' },
+          { value: 'greatherequals', label: 'greather or equals than' },
+        ];
+        if (currentField.condition == 'inrange'){
+          labelValue1 = 'Start value:';
+          labelValue2 = 'End value:';
+        } else if (currentField.condition && currentField.condition != 'empty' ){
+          labelValue1 = 'Value:';
+        }
+      }
+      // DATE
+      if (inputType == 'date'){
+        availableConditions = [
+          { value: 'empty', label: 'empty' },
+          { value: 'equals', label: 'equals' },
+          { value: 'inrange', label: 'in range' }
+        ];
+        if (currentField.condition == 'equals'){
+          availableRanges = [
+            { value: 'custom', label: 'Custom' },
+            { value: 'yesterday', label: 'Yesterday' },
+            { value: 'today', label: 'Today' },
+            { value: 'tomorrow', label: 'Tomorrow' },
+            { value: 'month', label: 'Current Month' },
+            { value: 'year', label: 'Current Year' }
+          ];
+        }
+        if (currentField.condition == 'inrange'){
+          availableRanges = [
+            { value: 'custom', label: 'Custom' },
+            { value: 'lastdays', label: '-# days 👉 Today' },
+            { value: 'nextdays', label: 'Today 👉 +# days' },
+            { value: 'lastmonths', label: '-# months 👉 Today' },
+            { value: 'nextmonths', label: 'Today 👉 +# months' },
+            { value: 'lastyears', label: '-# years 👉 Today' },
+            { value: 'nextyears', label: 'Today 👉 +# years' }
+          ];
+        }
+        if (currentField.condition == 'equals' && currentField.range == 'custom'){
+          labelValue1 = 'Date:';
+        }
+        if (currentField.condition == 'inrange' && currentField.range == 'custom'){
+          labelValue1 = 'Start date:';
+          labelValue2 = 'End date:';
+        }
+        if (currentField.condition == 'inrange' && currentField.range != 'custom'){
+          labelValue1 = 'Number:';
+          inputType = 'number';
+        }
+
+      }
+
+      return {
+        inputType: inputType,
+        showCondition: availableConditions.length > 0,
+        showRange: availableRanges.length > 0,
+        labelValue1: labelValue1,
+        labelValue2: labelValue2,
+        showValue1: labelValue1.length > 0,
+        showValue2: labelValue2.length > 0,
+        availableConditions: availableConditions,
+        availableRanges: availableRanges
+      }
+    },
     pendingNotification(){
       if (this.config.lastVisitedChangelog != this.changelogVersion){
         return true;
@@ -425,6 +626,18 @@ export default {
         this.currentScrollRowindex = currentScrollRowindex;
       }
     },
+    onClick_removeFilter(){
+      this.filterMode.field.condition = '';
+      this.filterMode.field.range = '';
+      this.closeContextMenu();
+    },
+    onClick_filterSQL() {
+      this.$gtag.event('filter-table', {
+        'event_label': this.tableContextMenu.table.name
+      });
+      this.filterMode.table = this.tableContextMenu.table;
+      this.closeContextMenu();
+    },
     onClick_openLink() {
       if (this.tableContextMenu.table.link) {
         this.$gtag.event('open-link', {
@@ -435,10 +648,11 @@ export default {
       this.closeContextMenu();
     },
     onClick_copySQL() {
-      let query = this.getQueryForCurrentTable();
+      const table = this.tableContextMenu.table;
+      let query = queryBuilder.buildQuery(table);
       console.log(query);
       this.$gtag.event('copy-sql', {
-        'event_label': this.tableContextMenu.table.name
+        'event_label': table.name
       });
       this.copyToClipboard(query);
       this.closeContextMenu();
@@ -462,16 +676,21 @@ export default {
       })
       return headers + fields.join('"\n"');
     },
-    getQueryForCurrentTable() {
-      let fields = this.tableContextMenu.table.fields.map(field => {
-        if (field.name.startsWith('_')) {
-          return `[${field.name}] AS ${field.name.substring(1)}`
-        }
-        return field.name;
-      })
+    openFieldFilter(event, table, field){
+      if (this.filterMode?.table?.name == null || this.filterMode?.table?.name != table.name){
+        return;
+      }
+      this.$gtag.event('filter-field', {
+        'event_label': table.name + '.' + field.name
+      });
 
-      let fieldsText = fields.join(",\n\t");
-      return `SELECT\n\t${fieldsText}\nFROM [${this.tableContextMenu.table.name}]\n`;
+      this.filterMode.field = field;
+      this.showOverlay = true;
+      this.mouseLocation = {
+        left: event.clientX - 10 + 'px',
+        top: event.clientY - 10 + 'px'
+      }
+      this.filterMode.showContextMenu = true;
     },
     openTableInfo(event, table) {
       this.showOverlay = true;
@@ -484,6 +703,7 @@ export default {
     },
     closeContextMenu() {
       this.tableContextMenu.show = false;
+      this.filterMode.showContextMenu = false;
       this.showOverlay = false;
     },
     setNameSize() {
