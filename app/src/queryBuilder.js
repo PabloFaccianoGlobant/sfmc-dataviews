@@ -40,19 +40,52 @@ function buildWhereCondition(field) {
     },
     date: {
       'empty': `${FIELD_NAME} IS NULL`,
+
+      'before-custom': `CONVERT(date, ${FIELD_NAME}) < CONVERT(date, '${FIELD_VALUE}')`,
+      'onbefore-custom': `CONVERT(date, ${FIELD_NAME}) <= CONVERT(date, '${FIELD_VALUE}')`,
+      'onafter-custom': `CONVERT(date, ${FIELD_NAME}) >= CONVERT(date, '${FIELD_VALUE}')`,
+      'after-custom': `CONVERT(date, ${FIELD_NAME}) > CONVERT(date, '${FIELD_VALUE}')`,
+
+
+      'before-yesterday': `CONVERT(date, ${FIELD_NAME}) < CONVERT(date, GETDATE()-1)`,
+      'onbefore-yesterday': `CONVERT(date, ${FIELD_NAME}) <= CONVERT(date, GETDATE()-1)`,
+      'onafter-yesterday': `CONVERT(date, ${FIELD_NAME}) >= CONVERT(date, GETDATE()-1)`,
+      'after-yesterday': `CONVERT(date, ${FIELD_NAME}) > CONVERT(date, GETDATE()-1)`,
+
+      'before-today': `CONVERT(date, ${FIELD_NAME}) < CONVERT(date, GETDATE())`,
+      'onbefore-today': `CONVERT(date, ${FIELD_NAME}) <= CONVERT(date, GETDATE())`,
+      'onafter-today': `CONVERT(date, ${FIELD_NAME}) >= CONVERT(date, GETDATE())`,
+      'after-today': `CONVERT(date, ${FIELD_NAME}) > CONVERT(date, GETDATE())`,
+
+      'before-tomorrow': `CONVERT(date, ${FIELD_NAME}) < CONVERT(date, GETDATE()+1)`,
+      'onbefore-tomorrow': `CONVERT(date, ${FIELD_NAME}) <= CONVERT(date, GETDATE()+1)`,
+      'onafter-tomorrow': `CONVERT(date, ${FIELD_NAME}) >= CONVERT(date, GETDATE()+1)`,
+      'after-tomorrow': `CONVERT(date, ${FIELD_NAME}) > CONVERT(date, GETDATE()+1)`,
+
+      'after-month': `CONVERT(date, ${FIELD_NAME}) > DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0)`,
+      'before-month': `CONVERT(date, ${FIELD_NAME}) < DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0)`,
+      'onafter-month': `CONVERT(date, ${FIELD_NAME}) >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0)`,
+      'onbefore-month': `CONVERT(date, ${FIELD_NAME}) <= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0)`,
+
+      'after-year': `YEAR(${FIELD_NAME}) > YEAR(GETDATE())`,
+      'before-year': `YEAR(${FIELD_NAME}) < YEAR(GETDATE())`,
+      'onafter-year': `YEAR(${FIELD_NAME}) >= YEAR(GETDATE())`,
+      'onbefore-year': `YEAR(${FIELD_NAME}) <= DYEAR(GETDATE())`,
+
       'equals-custom': `CONVERT(date, ${FIELD_NAME}) = CONVERT(date, '${FIELD_VALUE}')`,
       'equals-yesterday': `CONVERT(date, ${FIELD_NAME}) = CONVERT(date, GETDATE()-1)`,
       'equals-today': `CONVERT(date, ${FIELD_NAME}) = CONVERT(date, GETDATE())`,
       'equals-tomorrow': `CONVERT(date, ${FIELD_NAME}) = CONVERT(date, GETDATE()+1)`,
       'equals-month': `(MONTH(${FIELD_NAME}) = MONTH(GETDATE()) AND YEAR(${FIELD_NAME}) = YEAR(GETDATE()))`,
       'equals-year': `YEAR(${FIELD_NAME}) = YEAR(GETDATE())`,
+      
       'inrange-custom': `(CONVERT(date, ${FIELD_NAME}) BETWEEN CONVERT(date, '${FIELD_VALUE}') AND CONVERT(date, '${FIELD_VALUE_2}'))`,
-      'inrange-lastdays': `${FIELD_NAME} > GETDATE()-${FIELD_VALUE}`,
-      'inrange-nextdays': `${FIELD_NAME} < GETDATE()+${FIELD_VALUE}`,
-      'inrange-lastmonths': `${FIELD_NAME} < DATEADD(M, -${FIELD_VALUE}, GETDATE())`,
-      'inrange-nextmonths': `${FIELD_NAME} > DATEADD(M, +${FIELD_VALUE}, GETDATE())`,
-      'inrange-lastyears': `${FIELD_NAME} < DATEADD(Y, -${FIELD_VALUE}, GETDATE())`,
-      'inrange-nextyears': `${FIELD_NAME} > DATEADD(Y, +${FIELD_VALUE}, GETDATE())`
+      'inrange-lastdays': `CONVERT(date, ${FIELD_NAME}) > CONVERT(date, GETDATE()-${FIELD_VALUE})`,
+      'inrange-nextdays': `CONVERT(date, ${FIELD_NAME}) < CONVERT(date, GETDATE()+${FIELD_VALUE})`,
+      'inrange-lastmonths': `CONVERT(date, ${FIELD_NAME}) > CONVERT(date, DATEADD(M, -${FIELD_VALUE}, GETDATE()))`,
+      'inrange-nextmonths': `CONVERT(date, ${FIELD_NAME}) < CONVERT(date, DATEADD(M, +${FIELD_VALUE}, GETDATE()))`,
+      'inrange-lastyears': `CONVERT(date, ${FIELD_NAME}) > CONVERT(date, DATEADD(Y, -${FIELD_VALUE}, GETDATE()))`,
+      'inrange-nextyears': `CONVERT(date, ${FIELD_NAME}) < CONVERT(date, DATEADD(Y, +${FIELD_VALUE}, GETDATE()))`
     }
   };
 

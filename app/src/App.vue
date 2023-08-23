@@ -498,10 +498,14 @@ export default {
       if (inputType == 'date'){
         availableConditions = [
           { value: 'empty', label: 'empty' },
+          { value: 'before', label: 'before' },
+          { value: 'onbefore', label: 'on or before' },
+          { value: 'onafter', label: 'on or after' },
+          { value: 'after', label: 'after' },
           { value: 'equals', label: 'equals' },
           { value: 'inrange', label: 'in range' }
         ];
-        if (currentField.condition == 'equals'){
+        if (currentField.condition && currentField.condition != 'empty'){
           availableRanges = [
             { value: 'custom', label: 'Custom' },
             { value: 'yesterday', label: 'Yesterday' },
@@ -522,7 +526,9 @@ export default {
             { value: 'nextyears', label: 'Today 👉 +# years' }
           ];
         }
-        if (currentField.condition == 'equals' && currentField.range == 'custom'){
+        if ([
+          'before', 'onbefore', 'on', 'onafter', 'after'
+        ].includes(currentField.condition) && currentField.range == 'custom'){
           labelValue1 = 'Date:';
         }
         if (currentField.condition == 'inrange' && currentField.range == 'custom'){
